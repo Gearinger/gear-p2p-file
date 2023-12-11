@@ -50,6 +50,7 @@ defineExpose({ recordContent })
     height: calc(100% - 6px);
     border-width: 0rem;
     resize: none;
+    padding: 10px;
 }
 </style>
 

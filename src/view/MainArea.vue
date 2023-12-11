@@ -56,31 +56,58 @@ function removeClient(user: UserModel) {
     });
 }
 
-async function selectAndSendFile() {
+async function sliceFile(file: File) {
+    let start = 0;
+    let count = 0;
+    let chunkSize = 1024 * 1024;
+    const hashCode = new Date().getTime()
+    let sliceNode = ""
+    const totalSliceCount = Math.floor(file.size / chunkSize) + 1
+    while (start < file.size) {
+        let end = start + chunkSize
+        sliceNode = count + "_" + hashCode
+        if (start + chunkSize > file.size) {
+            sliceNode = "end_" + hashCode
+            end = file.size
+        }
+
+        const blob = file.slice(start, end)
+        const arrayBuffer = await blob.arrayBuffer()
+        sendFileToAll(arrayBuffer, file.name, sliceNode, totalSliceCount)
+        start += chunkSize
+        count++
+    }
+}
+
+async function selectFile() {
     const fileHandles = await window.showOpenFilePicker();
     console.log(fileHandles);
 
     for (const fileHandle of fileHandles) {
-        let start = 0;
-        let count = 0;
-        let chunkSize = 1024 * 1024;
         const file: File = await fileHandle.getFile();
-        const hashCode = new Date().getTime()
-        let sliceNode = ""
-        const totalSliceCount = Math.floor(file.size / chunkSize) + 1
-        while (start < file.size) {
-            let end = start + chunkSize
-            sliceNode = count + "_" + hashCode
-            if (start + chunkSize > file.size) {
-                sliceNode = "end_" + hashCode
-                end = file.size
-            }
+        sliceFile(file)
+    }
+}
 
-            const blob = file.slice(start, end)
-            const arrayBuffer = await blob.arrayBuffer()
-            sendFileToAll(arrayBuffer, fileHandle.name, sliceNode, totalSliceCount)
-            start += chunkSize
-            count++
+function dragFile(event: DragEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+    if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'copy'
+    }
+}
+
+function dropFile(event: DragEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+    const files = event.dataTransfer?.files
+
+    if (files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files.item(i);
+            if (file) {
+                sliceFile(file)
+            }
         }
     }
 }
@@ -93,7 +120,8 @@ defineExpose({ sendTextToAll })
 
         <div class="other-users">
             <div v-for="user in otherUserList">
-                <Client :user="user" @onClose="removeClient(user)" @on-click="selectAndSendFile"></Client>
+                <Client :user="user" @onClose="removeClient(user)" @on-click="selectFile"
+                    @dragover="dragFile" @drop="dropFile"></Client>
             </div>
         </div>
 
@@ -120,5 +148,13 @@ defineExpose({ sendTextToAll })
     width: 100%;
     min-height: 100px;
 }
+
+div.drop-zone:hover {
+    background-color: gray;
+    border: 1px dotted #000000;
+    cursor: move;
+}
+
+div.drop-zone {}
 </style>
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <defs>
+    <style>
+      .cls-1 {
+        font-size: 150px;
+        fill: #fff;
+        font-family: Impact;
+      }
+    </style>
+  </defs>
+  <text id="Gear" class="cls-1" x="3.249" y="195.23">Gear</text>
+</svg>
