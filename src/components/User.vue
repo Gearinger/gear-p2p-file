@@ -1,35 +1,57 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue"
-
+import { globalStore } from "../store"
 import { DataConnection, Peer } from "peerjs";
-import PeerUtil from "../PeerUtil";
+import PeerUtil from "../util/PeerUtil";
+import { randomName } from "../util/NameUtil"
+import UserInfo from "./UserInfo.vue";
+import { SendContentModel } from "../model/SendContentModel"
 
-const myName = ref<string>("Gear")
+const prop = defineProps({
+    name: String
+})
+
+const store = globalStore();
+const otherUserList = store.otherUserList
+const mainUser = store.mainUser
+
+const myName = ref<string>(prop.name ? prop.name : randomName())
 const peer = ref<Peer>()
 const connectionList = ref<DataConnection[]>([])
 const logined = ref(false)
 
+const emit = defineEmits(['recordContent', "avatarClick"])
+
+
 onMounted(() => {
+    login()
 })
 
 async function login() {
-    console.log('login');
     connectionList.value = []
 
     peer.value = await PeerUtil.connectToPeerJS(myName.value)
     logined.value = true
     console.log(`[${myName.value}] 已初始化`);
+    mainUser.name = myName.value
+    mainUser.isOnline = true
+    mainUser.isWaitConnect = false
 
     // 等待被连接
     peer.value.on('connection', conn => {
         console.log(`[${myName.value}] 被连接`);
 
+        otherUserList.push({
+            name: conn.peer,
+            isWaitConnect: false,
+            isOnline: true
+        })
         connectionList.value.push(conn)
 
         // 接受消息
         conn.on('data', data => {
             console.log(`从[${conn.peer}]接收到消息：`);
-            chatLog(conn.peer, myName.value, data as string)
+            recordContent(data as SendContentModel)
         });
 
         conn.on('close', () => {
@@ -65,53 +87,74 @@ async function connect(peerId: string) {
     if (!peer.value) {
         return
     }
-    const conn = await PeerUtil.connectToPeer(peer.value, peerId)
-    console.log(`[${myName.value}] 连接 [${peerId}] 成功！`);
-    connectionList.value.push(conn)
-    send(conn.peer, `Hello, MyName is ${myName.value}`)
 
-    // 接受消息
-    conn?.on('data', data => {
-        console.log(`从[${conn.peer}]接收到消息：`);
-        chatLog(conn.peer, myName.value, data as string)
-    });
-    conn?.on('close', () => {
-        console.log('Connection closed!');
-    });
+    // 先将被连接用户添加到界面，如果连不上，置为离线状态
+    otherUserList.push({
+        name: peerId,
+        isWaitConnect: true,
+        isOnline: false
+    })
+
+    try {
+        const conn = await PeerUtil.connectToPeer(peer.value, peerId)
+        console.log(`[${myName.value}] 连接 [${peerId}] 成功！`);
+        otherUserList.filter(p => p.name == peerId).forEach(p => { p.isWaitConnect = false; p.isOnline = true })
+        connectionList.value.push(conn)
+        send(conn.peer, {
+            type: "text",
+            sendUserName: myName.value,
+            textContent: `Hello, MyName is ${myName.value}`,
+        })
+
+        // 接受消息
+        conn.on('data', data => {
+            console.log(`从[${conn.peer}]接收到消息：`);
+            recordContent(data as SendContentModel)
+        });
+        conn.on('close', () => {
+            console.log('Connection closed!');
+        });
+    } catch (error) {
+        otherUserList.filter(p => p.name == peerId).forEach(p => { p.isWaitConnect = false, p.isOnline = false })
+    }
+
+
 }
 
-function send(peerId: string, content: string) {
+function send(peerId: string, content: SendContentModel) {
     const tempConn = connectionList.value.find(p => p.peer == peerId)
     if (!tempConn) return
     console.log(`给${tempConn.peer}发送消息：${content}`);
     tempConn.send(content);
-    chatLog(myName.value, tempConn.peer, content)
+    recordContent(content)
 }
 
-const sendToAll = (content: string | ArrayBuffer | null) => {
+const sendToAll = (content: SendContentModel) => {
     for (const conn of connectionList.value) {
         console.log(`给${conn.peer}发送消息：${content}`);
         conn.send(content);
-        chatLog(myName.value, conn.peer, content)
     }
+    recordContent(content)
 }
 
-function chatLog(name: string, yourName: string, text: string | ArrayBuffer | null) {
-    const chatContent = `${name} ==> ${yourName}\n${text}\n\n`
-    emit('chatLog', chatContent)
-
+function recordContent(content: SendContentModel) {
+    emit('recordContent', content)
 }
 
-
-const emit = defineEmits(['chatLog', "avatarClick"])
+const userInfoVisiable = ref(false)
+const userInfoPos = ref<[number, number]>([0, 0])
+function showUserInfo(e: MouseEvent) {
+    userInfoPos.value = [e.clientX, e.clientY]
+    userInfoVisiable.value = true
+}
 
 defineExpose({ sendToAll, connect })
 
 </script>
 
 <template>
-    <div class="user" :class="{ active: logined }">
-        <div class="letter" :class="{ active: logined }" @click="login">
+    <div class="user" :class="{ active: logined }" @mouseover="showUserInfo" @mouseleave="userInfoVisiable = false">
+        <div class="letter" :class="{ active: logined }">
             {{ myName[0] }}
         </div>
         <div class="user-ring" :class="{ active: logined }" style="scale: 1;">
@@ -119,12 +162,14 @@ defineExpose({ sendToAll, connect })
         </div>
         <input class="user-name" v-model="myName" @change="login" />
     </div>
+    <UserInfo :position="userInfoPos" v-if="userInfoVisiable"></UserInfo>
 </template>
 
 <style lang="less">
 .user {
-    position: absolute;
-    text-align: left;
+    width: 10rem;
+    height: 15rem;
+    position: relative;
     display: flex;
     text-align: center;
     justify-content: center;
@@ -169,7 +214,6 @@ defineExpose({ sendToAll, connect })
     position: absolute;
     font-size: 50px;
     line-height: 80px;
-    justify-content: center;
     text-align: center;
     user-select: none;
     border-radius: 100%;
@@ -177,8 +221,6 @@ defineExpose({ sendToAll, connect })
     border-radius: 100%;
     height: 80px;
     width: 80px;
-    /* left: -2px;
-    top: -5px; */
 }
 
 .letter.active {
