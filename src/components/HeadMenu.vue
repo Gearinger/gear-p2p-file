@@ -10,7 +10,7 @@ const name = ref<string>()
 const message = ref<string>()
 
 function about() {
-    window.open("")
+    window.open("https://gear.hermygong.com/p/gear-web%E7%AB%AFp2p%E8%81%8A%E5%A4%A9%E5%8F%8A%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93/")
 }
 
 </script>
