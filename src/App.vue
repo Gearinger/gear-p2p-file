@@ -12,6 +12,10 @@ function sendText(text: string) {
   mainAreaRef.value.sendTextToAll(text);
 }
 
+function sendFiles(selectFiles: File[]) {
+  mainAreaRef.value.sendFilesToAll(selectFiles)
+}
+
 function recordContent(content: SendContentModel) {
   chatArea.value.recordContent(content)
 }
@@ -21,7 +25,7 @@ function recordContent(content: SendContentModel) {
 
 <template>
   <div class="app">
-    <ChatArea ref="chatArea" @send-text-event="sendText"></ChatArea>
+    <ChatArea ref="chatArea" @send-text-event="sendText" @send-files-event="sendFiles"></ChatArea>
     <MainArea ref="mainAreaRef" @record-content="recordContent"></MainArea>
   </div>
 </template>

@@ -63,7 +63,6 @@ const isOnline = computed(() => prop.user?.isOnline)
 
 .client:hover {
     opacity: 1;
-    color: rgba(255, 255, 100, 1);
 }
 
 .client .letter {
@@ -79,7 +78,7 @@ const isOnline = computed(() => prop.user?.isOnline)
 }
 
 .client .letter:hover {
-    box-shadow: 0 0 50px 0px rgba(255, 255, 100, 0.3);
+    box-shadow: 0 0 50px 0px ;
 }
 
 .client .user-name {

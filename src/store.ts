@@ -15,7 +15,16 @@ export const globalStore = defineStore("globalStore", () => {
         isWaitConnect: false,
         isOnline: false
     })
+
+    const removeOtherUser = function (clientName: string) {
+        otherUserList.value.forEach((u, index, arr) => {
+            if (u.name == clientName) {
+                arr.splice(index, 1);
+            }
+        });
+    }
+
     return {
-        otherUserList, mainUser
+        otherUserList, mainUser, removeOtherUser
     }
 })

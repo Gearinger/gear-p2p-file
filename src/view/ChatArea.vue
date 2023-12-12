@@ -10,12 +10,16 @@ const chatHistoryRef = ref<any>()
 const textSend = ref<any>()
 const mainUser = globalStore().mainUser
 
-const emit = defineEmits(["sendTextEvent"])
+const emit = defineEmits(["sendTextEvent", "sendFilesEvent"])
 
 function sendText(text: string) {
     // chatHistoryRef.value.recordText(mainUser, text)
     emit("sendTextEvent", text)
     textSend.value.clearText()
+}
+
+function sendFiles(selectFiles: File[]) {
+    emit("sendFilesEvent", selectFiles)
 }
 
 function recordContent(content: SendContentModel) {
@@ -29,7 +33,7 @@ defineExpose({ recordContent })
     <div class="chat-area">
         <Logo></Logo>
         <ChatHistory ref="chatHistoryRef"></ChatHistory>
-        <TextSend ref="textSend" @sendText="sendText"></TextSend>
+        <TextSend ref="textSend" @sendText="sendText" @sendFiles="sendFiles"></TextSend>
     </div>
 </template>
 <style lang="less">

@@ -14,6 +14,7 @@ const prop = defineProps({
 const store = globalStore();
 const otherUserList = store.otherUserList
 const mainUser = store.mainUser
+const removeOtherUser = store.removeOtherUser
 
 const myName = ref<string>(prop.name ? prop.name : randomName())
 const peer = ref<Peer>()
@@ -28,6 +29,11 @@ onMounted(() => {
 })
 
 async function login() {
+    if (connectionList.value.length > 0) {
+        connectionList.value.forEach(p => {
+            p.close()
+        })
+    }
     connectionList.value = []
 
     peer.value = await PeerUtil.connectToPeerJS(myName.value)
@@ -56,6 +62,7 @@ async function login() {
 
         conn.on('close', () => {
             console.log('Connection closed!');
+            removeOtherUser(conn.peer)
         });
 
     });
@@ -113,6 +120,7 @@ async function connect(peerId: string) {
         });
         conn.on('close', () => {
             console.log('Connection closed!');
+            removeOtherUser(peerId)
         });
     } catch (error) {
         otherUserList.filter(p => p.name == peerId).forEach(p => { p.isWaitConnect = false, p.isOnline = false })
@@ -148,7 +156,7 @@ function showUserInfo(e: MouseEvent) {
     userInfoVisiable.value = true
 }
 
-defineExpose({ sendToAll, connect })
+defineExpose({ send, sendToAll, connect })
 
 </script>
 
@@ -162,7 +170,7 @@ defineExpose({ sendToAll, connect })
         </div>
         <input class="user-name" v-model="myName" @change="login" />
     </div>
-    <UserInfo :position="userInfoPos" v-if="userInfoVisiable"></UserInfo>
+    <UserInfo :position="userInfoPos" :info="mainUser" v-if="userInfoVisiable"></UserInfo>
 </template>
 
 <style lang="less">

@@ -9,12 +9,16 @@ const emit = defineEmits<{
 const name = ref<string>()
 const message = ref<string>()
 
+function about() {
+    window.open("")
+}
+
 </script>
 <template>
     <div class="head-menu">
         <input class="head-menu-input" type="text" placeholder="输入连接的对象……" v-model="name"  @keydown.enter="$emit('connect', name)">
         <button class="head-menu-button head-menu-connect" @click="$emit('connect', name)">连接</button>
-        <button class="head-menu-button head-menu-about">关于</button>
+        <button class="head-menu-button head-menu-about" @click="about">关于</button>
     </div>
 </template>
 <style lang="less" scoped>

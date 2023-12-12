@@ -10,6 +10,14 @@ const chatHistoryText = ref("")
 const mainUser = globalStore().mainUser
 const arrayBufferPool = new Map()
 
+function updatePercent(text: string, newPercent: string) {
+    let lastPercentIndex = text.lastIndexOf('%');
+    let beforePercent = text.substring(0, lastPercentIndex);
+    let lastNumberIndex = beforePercent.lastIndexOf('-');
+    let newText = text.substring(0, lastNumberIndex + 1) + newPercent + "%" + text.substring(lastPercentIndex + 1);
+    return newText
+}
+
 function recordContent(content: SendContentModel) {
     if (content.type == "text") {
         chatHistoryText.value += content.sendUserName + "：" + content.textContent + "\n";
@@ -17,7 +25,11 @@ function recordContent(content: SendContentModel) {
     if (content.type == "file") {
         const currentSlice = content.sliceNode?.split("_")[0]
         const transferPercent = Number(currentSlice == "end" ? content.totalSliceCount : currentSlice) / Number(content.totalSliceCount ?? 1) * 100
-        chatHistoryText.value += content.sendUserName + "：" + content.fileName + transferPercent.toFixed(2) + "%\n";
+        if (chatHistoryText.value.includes(`${content.sendUserName}：${content.fileName}`)) {
+            chatHistoryText.value = updatePercent(chatHistoryText.value, transferPercent.toFixed(2))
+        } else {
+            chatHistoryText.value += `${content.sendUserName}：${content.fileName}-${transferPercent.toFixed(2)}%\n`;
+        }
         if (content.sendUserName != mainUser.name) {
             arrayBufferPool.set(content.sliceNode, content.byteContent)
             if (content.sliceNode?.startsWith("end")) {
