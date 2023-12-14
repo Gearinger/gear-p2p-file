@@ -176,13 +176,13 @@ defineExpose({ send, sendToAll, connect })
 <style lang="less">
 .user {
     width: 10rem;
-    height: 15rem;
+    height: 13rem;
+    max-height: 15rem;
     position: relative;
     display: flex;
     text-align: center;
     justify-content: center;
     cursor: pointer;
-
     opacity: 0.5;
 }
 

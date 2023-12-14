@@ -176,6 +176,7 @@ defineExpose({ sendTextToAll, sendFilesToAll })
 <style lang="less">
 .main-body {
     width: 100%;
+    min-width: 300px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -197,6 +198,13 @@ div.drop-zone:hover {
     background-color: gray;
     border: 1px dotted #000000;
     cursor: move;
+}
+
+@media (max-width: 600px){
+    .main-body{
+        height: calc(70vh);
+        font-size: 0.6rem;
+    }
 }
 </style>
 

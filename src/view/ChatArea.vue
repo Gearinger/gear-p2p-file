@@ -38,6 +38,7 @@ defineExpose({ recordContent })
 </template>
 <style lang="less">
 .chat-area {
+    min-width: 300px;
     width: 25%;
     height: 100%;
     background-color: rgba(100, 100, 100, 1.0);
@@ -45,6 +46,13 @@ defineExpose({ recordContent })
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+}
+
+@media (max-width: 600px){
+    .chat-area{
+        height: 30%;
+        width: 100%;
+    }
 }
 </style>
 

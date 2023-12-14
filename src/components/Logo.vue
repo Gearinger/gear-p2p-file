@@ -13,5 +13,12 @@
     width: 100%;
     background-color: rgba(200, 130, 100, 1.0);
 }
+
+@media (max-width: 600px){
+    .logo{
+        min-height: 30px;
+        font-size: 0.6rem;
+    }
+}
 </style>
 

@@ -30,7 +30,8 @@ const isOnline = computed(() => prop.user?.isOnline)
 <style lang="less">
 .client {
     position: relative;
-    width: 100px;
+    width: 10rem;
+    height: 10rem;
     display: flex;
     text-align: center;
     justify-content: center;

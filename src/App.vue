@@ -38,4 +38,10 @@ function recordContent(content: SendContentModel) {
   justify-content: center;
   align-items: center;
 }
+
+@media (max-width: 600px){
+    .app{
+        flex-wrap: wrap;
+    }
+}
 </style>

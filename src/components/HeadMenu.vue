@@ -50,5 +50,21 @@ function about() {
     margin-right: 0rem;
     border-radius: 5px 0 0px 5px;
 }
+
+@media (max-width: 600px){
+    .head-menu{
+        font-size: 0.6rem;
+        align-self: end;
+        justify-self: end;
+    }
+
+    .head-menu-button{
+        margin-right: 0.5rem;
+    }
+
+    .head-menu-input{
+        font-size: 0.6rem;
+    }
+}
 </style>
 

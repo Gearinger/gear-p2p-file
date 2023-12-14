@@ -2,7 +2,12 @@
 import Peer, { DataConnection } from "peerjs";
 function connectToPeerJS(peerId: string): Promise<Peer> {
     return new Promise((resolve, reject) => {
-        const peer = new Peer(peerId);
+        const peer = new Peer(peerId,
+            {
+                host: "111.229.255.253",
+                port: 9008,
+                path: "/",
+            });
         peer.on('open', () => resolve(peer));
         peer.on('error', reject);
     });
