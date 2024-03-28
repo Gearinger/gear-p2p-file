@@ -258,7 +258,7 @@ defineExpose({ send, sendToAll, connect })
 @keyframes ripple {
     to {
         opacity: 0;
-        transform: scale(2);
+        transform: scale(1.8);
     }
 }
 
